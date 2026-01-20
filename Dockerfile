@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 WORKDIR /app
 
 COPY --from=builder /app/target/release/x402-rs /usr/local/bin/x402-rs
+COPY --from=builder /app/config.json ./config.json
 
 EXPOSE $PORT
 ENV RUST_LOG=info
