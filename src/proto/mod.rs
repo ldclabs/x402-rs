@@ -159,7 +159,14 @@ impl VerifyRequest {
     ///
     /// Returns `None` if the request format is invalid or the scheme is unknown.
     pub fn scheme_handler_slug(&self) -> Option<SchemeHandlerSlug> {
-        let x402_version: u8 = self.0.get("x402Version")?.as_u64()?.try_into().ok()?;
+        let x402_version: u8 = self
+            .0
+            .get("paymentPayload")?
+            .get("x402Version")?
+            .as_u64()?
+            .try_into()
+            .ok()?;
+
         match x402_version {
             v1::X402Version1::VALUE => {
                 let network_name = self.0.get("paymentPayload")?.get("network")?.as_str()?;

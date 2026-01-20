@@ -4,3 +4,4 @@
 crates/*/target/
 examples/*/.env
 config.json
+debug

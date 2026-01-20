@@ -102,9 +102,9 @@ pub type SettleResponse = v1::SettleResponse;
 #[serde(rename_all = "camelCase")]
 pub struct ResourceInfo {
     /// Human-readable description of the resource.
-    pub description: String,
+    pub description: Option<String>,
     /// MIME type of the resource content.
-    pub mime_type: String,
+    pub mime_type: Option<String>,
     /// URL of the resource.
     pub url: String,
 }
@@ -115,8 +115,6 @@ pub struct ResourceInfo {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VerifyRequest<TPayload, TRequirements> {
-    /// Protocol version (always 2).
-    pub x402_version: X402Version2,
     /// The signed payment authorization.
     pub payment_payload: TPayload,
     /// The payment requirements to verify against.
