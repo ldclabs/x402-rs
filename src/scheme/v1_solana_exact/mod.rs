@@ -571,7 +571,7 @@ pub async fn verify_transaction(
     let tx = TransactionInt::new(transaction.clone()).sign(provider)?;
     let cfg = RpcSimulateTransactionConfig {
         sig_verify: false,
-        replace_recent_blockhash: false,
+        replace_recent_blockhash: true,
         commitment: Some(CommitmentConfig::confirmed()),
         encoding: None,
         accounts: None,
