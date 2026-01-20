@@ -295,6 +295,21 @@ impl SolanaPrivateKey {
         Ok(Self(arr))
     }
 
+    /// Parse a JSON array string into a private key (64 bytes in standard Solana format).
+    pub fn from_json(s: &str) -> Result<Self, String> {
+        let vec: Vec<u8> = serde_json::from_str(s)
+            .map_err(|e| format!("Invalid JSON array for Solana private key: {}", e))?;
+        if vec.len() != 64 {
+            return Err(format!(
+                "Private key must be 64 bytes (standard Solana format), got {} bytes",
+                vec.len()
+            ));
+        }
+        let mut arr = [0u8; 64];
+        arr.copy_from_slice(&vec);
+        Ok(Self(arr))
+    }
+
     /// Encode the keypair back to base58.
     pub fn to_base58(&self) -> String {
         bs58::encode(&self.0).into_string()
@@ -314,7 +329,13 @@ impl FromStr for SolanaPrivateKey {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_base58(s)
+        if s.starts_with('[') {
+            // JSON array format
+            Self::from_json(s)
+        } else {
+            // Base58 format
+            Self::from_base58(s)
+        }
     }
 }
 
@@ -404,8 +425,8 @@ impl SolanaChainConfig {
     pub fn chain_id(&self) -> ChainId {
         self.chain_reference.into()
     }
-    pub fn pubsub(&self) -> &Option<Url> {
-        &self.inner.pubsub
+    pub fn pubsub(&self) -> Option<&Url> {
+        self.inner.pubsub.as_ref().map(|v| &**v)
     }
 }
 
@@ -447,10 +468,10 @@ pub struct SolanaChainConfigInner {
     /// A single private key (base58 format, 64 bytes) or env var reference.
     pub signer: SolanaSignerConfig,
     /// RPC provider configuration for this chain (required).
-    pub rpc: Url,
+    pub rpc: LiteralOrEnv<Url>,
     /// RPC pubsub provider endpoint (optional)
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub pubsub: Option<Url>,
+    pub pubsub: Option<LiteralOrEnv<Url>>,
     /// Maximum compute unit limit for transactions (optional)
     #[serde(default = "solana_chain_config::default_max_compute_unit_limit")]
     pub max_compute_unit_limit: u32,
